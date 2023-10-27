@@ -17,6 +17,6 @@ class TOPDOWN_API UTopDownAnimInstance : public UAnimInstance
 	//UTopDownAnimInstance();
 	virtual void NativeUpdateAnimation(float DeltaSeconds);
 private:
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Speed,Meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	float Speed;
 };

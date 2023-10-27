@@ -15,8 +15,13 @@ public:
 	// Sets default values for this actor's properties
 	AEnemyActor();
 
+private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Direc, Meta = (AllowPrivateAccess = true))
 	int32 Direc;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Direc")
+	int32 GetDirec() const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

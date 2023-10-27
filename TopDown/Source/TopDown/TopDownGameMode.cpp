@@ -16,4 +16,8 @@ ATopDownGameMode::ATopDownGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+	
 }
+/*void ATopDownGameMode::StartGame() {
+	
+}*/
