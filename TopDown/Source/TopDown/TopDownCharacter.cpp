@@ -89,3 +89,23 @@ void ATopDownCharacter::Tick(float DeltaSeconds)
 		}
 	}
 }
+
+int32 ATopDownCharacter::GetBuff()
+{
+	return Buff;
+}
+
+FString ATopDownCharacter::GetMyColor()
+{
+	return MyColor;
+}
+
+void ATopDownCharacter::SetBuff(int32 setBuff)
+{
+	Buff = setBuff;
+}
+
+void ATopDownCharacter::SetMyColor(FString setMyColor)
+{
+	MyColor = setMyColor;
+}

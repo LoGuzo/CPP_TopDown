@@ -21,8 +21,10 @@ public:
 	virtual void OnUnPossess() override;
 
 private:
-	void FrontMove();
-
-private:
 	FTimerHandle TimerHandle;
+
+	UPROPERTY()
+	class UBehaviorTree* EnemyBehaviorTree;
+	UPROPERTY()
+	class UBlackboardData* EnemyBlackboradData;
 };

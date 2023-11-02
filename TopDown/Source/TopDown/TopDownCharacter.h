@@ -37,5 +37,21 @@ private:
 	/** A decal that projects to the cursor location. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UDecalComponent* CursorToWorld;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
+	int32 Buff;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
+	FString MyColor;
+public:
+	UFUNCTION(BlueprintCallable)
+	int32 GetBuff();
+	UFUNCTION(BlueprintCallable)
+	FString GetMyColor();
+	UFUNCTION(BlueprintCallable)
+	void SetBuff(int32 setBuff);
+	UFUNCTION(BlueprintCallable)
+	void SetMyColor(FString setMyColor);
+
 };
 

@@ -3,6 +3,7 @@
 
 #include "EnemyCharacter.h"
 #include "EnemyAIController.h"
+#include "TopDownAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -14,7 +15,8 @@ AEnemyCharacter::AEnemyCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to moving direction
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 640.f, 0.f);
 	AIControllerClass = AEnemyAIController::StaticClass();
-	AutoPossessAI = EAutoPossessAI::Spawned;
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 }
 
 // Called when the game starts or when spawned
@@ -36,5 +38,15 @@ void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+// Attack Func
+void AEnemyCharacter::Attack()
+{
+	auto Animinstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
+	if (Animinstance)
+	{
+		Animinstance->PlayAttackMontage();
+	}
 }
 
