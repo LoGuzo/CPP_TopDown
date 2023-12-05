@@ -6,6 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "TopDownAnimInstance.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnAttackHit);
 /**
  * 
  */
@@ -21,7 +22,15 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds);
 
 	//Called AttackMontage
-	void PlayAttackMontage();
+	void EPlayAttackMontage();
+	void CPlayAttackMontage();
+	
+	//DeadMontage
+	void PlayDeadMontage();
+
+	FOnAttackHit OnAttackHit;
+	UFUNCTION()
+	void setIsDead(bool a);
 private:
 	//Check Speed
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
@@ -29,5 +38,17 @@ private:
 
 	//Enemy AttackMontage
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage;
+	UAnimMontage* EAttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* CAttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* DeadMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = DeadCheck, Meta = (AllowPrivateAccess = true))
+	bool isDead;
+
+	UFUNCTION()
+	void AnimNotify_AttackHit();
 };

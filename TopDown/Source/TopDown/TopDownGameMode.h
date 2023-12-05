@@ -13,6 +13,8 @@ class ATopDownGameMode : public AGameModeBase
 
 public:
 	ATopDownGameMode();
+
+
 };
 
 

@@ -10,7 +10,7 @@
 UBTService_SearchTarget::UBTService_SearchTarget() 
 {
 	NodeName = TEXT("SearchTarget");
-	Interval = 3.0f;
+	Interval = 5.0f;
 }
 
 // Tick Search

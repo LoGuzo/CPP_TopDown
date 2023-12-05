@@ -5,6 +5,8 @@
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "TopDownCharacter.h"
+#include "TopDownAnimInstance.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 
 ATopDownPlayerController::ATopDownPlayerController()
@@ -37,6 +39,18 @@ void ATopDownPlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ATopDownPlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("ResetVR", IE_Pressed, this, &ATopDownPlayerController::OnResetVR);
+	InputComponent->BindAction("Attack",IE_Pressed, this, &ATopDownPlayerController::Attack);
+}
+
+void ATopDownPlayerController::BeginPlay()
+{
+	if (ATopDownCharacter* MyPawn = Cast<ATopDownCharacter>(GetPawn()))
+	{
+		if (UTopDownAnimInstance* AnimInstance = Cast<UTopDownAnimInstance>(MyPawn->GetMesh()->GetAnimInstance()))
+		{
+			AnimInstance->OnMontageEnded.AddDynamic(this, &ATopDownPlayerController::OnAttackMontageEnded);
+		}
+	}
 }
 
 void ATopDownPlayerController::OnResetVR()
@@ -46,26 +60,29 @@ void ATopDownPlayerController::OnResetVR()
 
 void ATopDownPlayerController::MoveToMouseCursor()
 {
-	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
+	if (!IsAttacking) 
 	{
-		if (ATopDownCharacter* MyPawn = Cast<ATopDownCharacter>(GetPawn()))
+		if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
 		{
-			if (MyPawn->GetCursorToWorld())
+			if (ATopDownCharacter* MyPawn = Cast<ATopDownCharacter>(GetPawn()))
 			{
-				UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MyPawn->GetCursorToWorld()->GetComponentLocation());
+				if (MyPawn->GetCursorToWorld())
+				{
+					UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MyPawn->GetCursorToWorld()->GetComponentLocation());
+				}
 			}
 		}
-	}
-	else
-	{
-		// Trace to see what is under the mouse cursor
-		FHitResult Hit;
-		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-
-		if (Hit.bBlockingHit)
+		else
 		{
-			// We hit something, move there
-			SetNewMoveDestination(Hit.ImpactPoint);
+			// Trace to see what is under the mouse cursor
+			FHitResult Hit;
+			GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+
+			if (Hit.bBlockingHit)
+			{
+				// We hit something, move there
+				SetNewMoveDestination(Hit.ImpactPoint);
+			}
 		}
 	}
 }
@@ -86,15 +103,18 @@ void ATopDownPlayerController::MoveToTouchLocation(const ETouchIndex::Type Finge
 
 void ATopDownPlayerController::SetNewMoveDestination(const FVector DestLocation)
 {
-	APawn* const MyPawn = GetPawn();
-	if (MyPawn)
+	if (!IsAttacking) 
 	{
-		float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
-
-		// We need to issue move command only if far enough in order for walk animation to play correctly
-		if ((Distance > 120.0f))
+		APawn* const MyPawn = GetPawn();
+		if (MyPawn)
 		{
-			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
+			float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
+
+			// We need to issue move command only if far enough in order for walk animation to play correctly
+			if ((Distance > 120.0f))
+			{
+				UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
+			}
 		}
 	}
 }
@@ -110,3 +130,22 @@ void ATopDownPlayerController::OnSetDestinationReleased()
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
 }
+
+void ATopDownPlayerController::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruped)
+{
+	IsAttacking = false;
+}
+void ATopDownPlayerController::Attack()
+{
+	ATopDownCharacter* TopDownCharacter = Cast<ATopDownCharacter>(GetPawn());
+	StopMovement();
+	auto Animinstance = Cast<UTopDownAnimInstance>(TopDownCharacter -> GetMesh()->GetAnimInstance());
+	if (IsAttacking)
+		return;
+	if (Animinstance)
+	{
+		Animinstance->CPlayAttackMontage();
+	}
+	IsAttacking = true;
+}
+

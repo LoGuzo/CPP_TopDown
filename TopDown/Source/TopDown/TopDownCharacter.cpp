@@ -10,7 +10,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
+#include "EnemyCharacter.h"
+#include "TopDownAnimInstance.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "EnemyStatComponent.h"
 
 ATopDownCharacter::ATopDownCharacter()
 {
@@ -27,7 +31,7 @@ ATopDownCharacter::ATopDownCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 640.f, 0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
 	GetCharacterMovement()->bSnapToPlaneAtStart = true;
-	
+
 	// Create a camera boom...
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -53,15 +57,23 @@ ATopDownCharacter::ATopDownCharacter()
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 
+
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	Stat = CreateDefaultSubobject<UEnemyStatComponent>(TEXT("STAT"));
+}
+
+void ATopDownCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	Stat->SetType(Type);
 }
 
 void ATopDownCharacter::Tick(float DeltaSeconds)
 {
-    Super::Tick(DeltaSeconds);
-
+	Super::Tick(DeltaSeconds);
 	if (CursorToWorld != nullptr)
 	{
 		if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
@@ -90,6 +102,18 @@ void ATopDownCharacter::Tick(float DeltaSeconds)
 	}
 }
 
+void ATopDownCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	AnimInstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->OnAttackHit.AddUObject(this, &ATopDownCharacter::AttackCheck);
+	}
+}
+
+
 int32 ATopDownCharacter::GetBuff()
 {
 	return Buff;
@@ -109,3 +133,51 @@ void ATopDownCharacter::SetMyColor(FString setMyColor)
 {
 	MyColor = setMyColor;
 }
+
+float ATopDownCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Stat->OnAttacked(DamageAmount);
+	Hp = Stat->GetHp();
+
+	return DamageAmount;
+}
+
+void ATopDownCharacter::AttackCheck()
+{
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	float AttackRange = 400.f;
+	float AttackRadius = 100.f;
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		OUT HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AttackRange,
+		FQuat::Identity,
+		ECollisionChannel::ECC_EngineTraceChannel5,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
+
+	FVector Vec = GetActorForwardVector() * AttackRange;
+	FVector Center = GetActorLocation() + Vec * 0.5f;
+	float HalfHeight = AttackRange * 0.5f + AttackRadius;
+	FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
+	FColor DrawColor;
+	if (bResult)
+		DrawColor = FColor::Green;
+	else
+		DrawColor = FColor::Red;
+
+	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 2.f);
+
+	if (bResult && HitResult.Actor.IsValid())
+	{
+		AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(HitResult.Actor.Get());
+		if (Enemy){
+			FDamageEvent DamageEvent;
+			HitResult.Actor->TakeDamage(Stat->GetAttack(), DamageEvent, GetController(), this);
+		}
+	}
+}
+

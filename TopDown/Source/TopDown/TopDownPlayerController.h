@@ -21,6 +21,7 @@ protected:
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
+	virtual void BeginPlay() override;
 	// End PlayerController interface
 
 	/** Resets HMD orientation in VR. */
@@ -38,6 +39,14 @@ protected:
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruped);
+
+	void Attack();
+
+	UPROPERTY(VisibleAnywhere)
+	bool IsAttacking = false;
 };
 
 

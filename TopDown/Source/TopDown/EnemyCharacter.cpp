@@ -5,6 +5,7 @@
 #include "EnemyAIController.h"
 #include "TopDownAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "EnemyStatComponent.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -17,13 +18,28 @@ AEnemyCharacter::AEnemyCharacter()
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	Stat = CreateDefaultSubobject<UEnemyStatComponent>(TEXT("STAT"));
+
 }
 
 // Called when the game starts or when spawned
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Stat->SetType(Type);
+}
+
+void AEnemyCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	AnimInstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) 
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &AEnemyCharacter::OnAttackMontageEnded);
+		AnimInstance->OnAttackHit.AddUObject(this, &AEnemyCharacter::AttackCheck);
+		AnimInstance->setIsDead(false);
+	}
 }
 
 // Called every frame
@@ -43,10 +59,74 @@ void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 // Attack Func
 void AEnemyCharacter::Attack()
 {
+	if (IsAttacking)
+		return;
 	auto Animinstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
 	if (Animinstance)
 	{
-		Animinstance->PlayAttackMontage();
+		Animinstance->EPlayAttackMontage();
 	}
+	IsAttacking = true;
 }
+
+void AEnemyCharacter::AttackCheck()
+{
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+
+	float AttackRange = 100.f;
+	float AttackRadius = 50.f;
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		OUT HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AttackRange,
+		FQuat::Identity,
+		ECollisionChannel::ECC_EngineTraceChannel5,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
+	if (bResult && HitResult.Actor.IsValid())
+	{
+		FDamageEvent DamageEvent;
+		HitResult.Actor->TakeDamage(Stat->GetAttack(), DamageEvent, GetController(), this);
+	}
+
+}
+
+void AEnemyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruped)
+{
+	IsAttacking = false;
+	OnAttackEnd.Broadcast();
+}
+
+float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Stat->OnAttacked(DamageAmount);
+	Hp = Stat->GetHp();
+	if (Hp <= 0) {
+		auto Animinstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
+		if (Animinstance)
+		{
+			Animinstance->PlayDeadMontage();
+			Animinstance->setIsDead(true);
+			FTimerHandle TimerHandle;
+			FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &AEnemyCharacter::DestroyC);
+
+			//Delay 1sec
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 1.f, false);
+		}
+	}
+	return DamageAmount;
+}
+
+void AEnemyCharacter::setCoordi(const FVector& NewCoordi)
+{
+	Coordi = NewCoordi;
+}
+
+void AEnemyCharacter::DestroyC()
+{
+	Destroy();
+}
+
 

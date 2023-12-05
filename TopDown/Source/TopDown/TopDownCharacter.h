@@ -14,6 +14,7 @@ class ATopDownCharacter : public ACharacter
 public:
 	ATopDownCharacter();
 
+	virtual void BeginPlay() override;
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -24,6 +25,9 @@ public:
 
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
+
+	virtual void PostInitializeComponents() override;
+
 
 private:
 	/** Top down camera */
@@ -43,15 +47,32 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	FString MyColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
+	int32 Type;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
+	int32 Hp;
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UPROPERTY(VisibleAnywhere)
+	class UEnemyStatComponent* Stat;
+	void AttackCheck();
 public:
+
 	UFUNCTION(BlueprintCallable)
 	int32 GetBuff();
+
 	UFUNCTION(BlueprintCallable)
 	FString GetMyColor();
+
 	UFUNCTION(BlueprintCallable)
 	void SetBuff(int32 setBuff);
+
 	UFUNCTION(BlueprintCallable)
 	void SetMyColor(FString setMyColor);
 
+	UPROPERTY()
+	class UTopDownAnimInstance* AnimInstance;
 };
-
