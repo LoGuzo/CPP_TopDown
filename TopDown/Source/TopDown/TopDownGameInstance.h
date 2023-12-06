@@ -62,7 +62,7 @@ private:
 	bool cntEnemyR;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy, Meta = (AllowPrivateAccess = true))
-	bool FirstEnemy;
+	bool FirstEnemy = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Coordi, Meta = (AllowPrivateAccess = true))
 	TArray<FVector> saveCoordi;
