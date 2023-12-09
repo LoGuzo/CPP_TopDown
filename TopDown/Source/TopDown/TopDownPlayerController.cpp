@@ -149,3 +149,8 @@ void ATopDownPlayerController::Attack()
 	IsAttacking = true;
 }
 
+void ATopDownPlayerController::StopMovement()
+{
+
+}
+

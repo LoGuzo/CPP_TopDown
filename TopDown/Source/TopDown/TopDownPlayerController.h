@@ -42,8 +42,13 @@ protected:
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruped);
-
+	
+	UFUNCTION()
 	void Attack();
+
+	UFUNCTION()
+	void StopMovement();
+
 
 	UPROPERTY(VisibleAnywhere)
 	bool IsAttacking = false;

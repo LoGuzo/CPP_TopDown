@@ -21,7 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeComponent() override;
 public:	
-	void SetType(int32 type);
+	void SetType(int32 newtype);
 	void OnAttacked(float DamageAmount);
 
 	int32 GetType() { return type; }

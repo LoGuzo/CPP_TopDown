@@ -40,7 +40,7 @@ void UEnemyStatComponent::SetType(int32 newtype)
 		auto StatData = MyGameInstance->GetStatData(newtype);
 		if (StatData)
 		{
-			//type = StatData->type;
+			type = StatData->type;
 			Hp = StatData->MaxHP;
 			Attack = StatData->Attack;
 		}

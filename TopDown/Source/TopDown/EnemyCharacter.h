@@ -57,6 +57,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	float Speed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
+	FString EColor;
+
 	UPROPERTY(VisibleAnywhere)
 	bool IsAttacking = false;
 

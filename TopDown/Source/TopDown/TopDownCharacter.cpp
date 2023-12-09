@@ -36,8 +36,8 @@ ATopDownCharacter::ATopDownCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetUsingAbsoluteRotation(true); // Don't want arm to rotate when character does
-	CameraBoom->TargetArmLength = 900.f;
-	CameraBoom->SocketOffset = FVector(0.f, 0.f, 100.f);
+	CameraBoom->TargetArmLength = 800.f;
+	CameraBoom->SocketOffset = FVector(0.f, 0.f, 0.f);
 	CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
 	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
@@ -105,7 +105,6 @@ void ATopDownCharacter::Tick(float DeltaSeconds)
 void ATopDownCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
 	AnimInstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
@@ -124,9 +123,9 @@ FString ATopDownCharacter::GetMyColor()
 	return MyColor;
 }
 
-void ATopDownCharacter::SetBuff(int32 setBuff)
+void ATopDownCharacter::SetBuff(int32 b)
 {
-	Buff = setBuff;
+	Buff = b;
 }
 
 void ATopDownCharacter::SetMyColor(FString setMyColor)
@@ -147,8 +146,8 @@ void ATopDownCharacter::AttackCheck()
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	float AttackRange = 400.f;
-	float AttackRadius = 100.f;
+	float AttackRange = 300.f;
+	float AttackRadius = 75.f;
 	bool bResult = GetWorld()->SweepSingleByChannel(
 		OUT HitResult,
 		GetActorLocation(),
