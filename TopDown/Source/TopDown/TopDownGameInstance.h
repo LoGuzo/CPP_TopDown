@@ -67,6 +67,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Coordi, Meta = (AllowPrivateAccess = true))
 	TArray<FVector> saveCoordi;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inform, Meta = (AllowPrivateAccess = true))
+	AActor* InsWhoDestroyed;
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -95,4 +97,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool chkSaveCoordi(const FVector& Coordinate);
+
+	UFUNCTION(BlueprintCallable)
+	AActor* getIWD();
+
+	UFUNCTION(BlueprintCallable)
+	void SetIWD(AActor* a);
 };

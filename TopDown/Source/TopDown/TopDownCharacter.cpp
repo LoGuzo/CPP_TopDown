@@ -133,6 +133,11 @@ void ATopDownCharacter::SetMyColor(FString setMyColor)
 	MyColor = setMyColor;
 }
 
+void ATopDownCharacter::SetIDM()
+{
+	IDestroyedM = true;
+}
+
 float ATopDownCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Stat->OnAttacked(DamageAmount);

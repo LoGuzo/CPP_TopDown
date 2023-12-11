@@ -57,8 +57,13 @@ private:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	UPROPERTY(VisibleAnywhere)
+
 	class UEnemyStatComponent* Stat;
+
 	void AttackCheck();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inform, Meta = (AllowPrivateAccess = true))
+	bool IDestroyedM = false;
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -75,4 +80,7 @@ public:
 
 	UPROPERTY()
 	class UTopDownAnimInstance* AnimInstance;
+
+	UFUNCTION(BlueprintCallable)
+	void SetIDM();
 };

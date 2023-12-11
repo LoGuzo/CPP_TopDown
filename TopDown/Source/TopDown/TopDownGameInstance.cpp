@@ -66,3 +66,13 @@ bool UTopDownGameInstance::chkSaveCoordi(const FVector& Coordinate)
 {
 	return saveCoordi.Contains(Coordinate);
 }
+
+AActor* UTopDownGameInstance::getIWD()
+{
+	return InsWhoDestroyed;
+}
+
+void UTopDownGameInstance::SetIWD(AActor* a)
+{
+	InsWhoDestroyed = a;
+}

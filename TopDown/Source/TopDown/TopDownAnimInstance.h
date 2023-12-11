@@ -28,6 +28,7 @@ public:
 	//DeadMontage
 	void PlayDeadMontage();
 
+
 	FOnAttackHit OnAttackHit;
 	UFUNCTION()
 	void setIsDead(bool a);

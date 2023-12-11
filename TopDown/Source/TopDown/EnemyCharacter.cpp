@@ -105,6 +105,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	Hp = Stat->GetHp();
 	if (Hp <= 0) {
 		auto Animinstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
+		WhoDestroyed = DamageCauser;
 		if (Animinstance)
 		{
 			Animinstance->PlayDeadMontage();
@@ -115,6 +116,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 			if (ATopDownCharacter* ChkCharacter = Cast<ATopDownCharacter>(DamageCauser)) {
 				if (EColor == ChkCharacter->GetMyColor()) {
 					ChkCharacter->SetBuff(ChkCharacter->GetBuff() + 1);
+
 				}
 			}
 			//Delay 1sec

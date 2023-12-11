@@ -37,12 +37,14 @@ void UEnemyStatComponent::SetType(int32 newtype)
 	auto MyGameInstance=Cast<UTopDownGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	if (MyGameInstance)
 	{
-		auto StatData = MyGameInstance->GetStatData(newtype);
-		if (StatData)
-		{
-			type = StatData->type;
-			Hp = StatData->MaxHP;
-			Attack = StatData->Attack;
+		if (newtype != 0) {
+			auto StatData = MyGameInstance->GetStatData(newtype);
+			if (StatData)
+			{
+				type = StatData->type;
+				Hp = StatData->MaxHP;
+				Attack = StatData->Attack;
+			}
 		}
 	}
 }

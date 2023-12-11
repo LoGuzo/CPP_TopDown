@@ -69,6 +69,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Coordi, Meta = (AllowPrivateAccess = true))
 	FVector Coordi;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inform, Meta = (AllowPrivateAccess = true))
+	AActor* WhoDestroyed;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void setCoordi(const FVector& NewCoordi);
