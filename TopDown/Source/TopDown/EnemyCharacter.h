@@ -77,4 +77,5 @@ public:
 	void setCoordi(const FVector& NewCoordi);
 
 	void DestroyC();
+
 };

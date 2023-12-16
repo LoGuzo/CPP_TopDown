@@ -7,12 +7,14 @@
 #include "TopDownCharacter.h"
 #include "TopDownAnimInstance.h"
 #include "DrawDebugHelpers.h"
+#include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
 
 ATopDownPlayerController::ATopDownPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+	IsAttacking = false;
 }
 
 void ATopDownPlayerController::PlayerTick(float DeltaTime)
@@ -22,7 +24,21 @@ void ATopDownPlayerController::PlayerTick(float DeltaTime)
 	// keep updating the destination every tick while desired
 	if (bMoveToMouseCursor)
 	{
-		MoveToMouseCursor();
+		FHitResult Hit;
+		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+		if (Hit.bBlockingHit)
+		{
+			if (HasAuthority()) {
+				SetNewMoveDestination(Hit.ImpactPoint);
+			}
+			else {
+				SetNewMoveDestination(Hit.ImpactPoint);
+				if (!IsAttacking)
+				{
+					UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, Hit.ImpactPoint);
+				}
+			}
+		}
 	}
 }
 
@@ -33,77 +49,17 @@ void ATopDownPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("SetDestination", IE_Pressed, this, &ATopDownPlayerController::OnSetDestinationPressed);
 	InputComponent->BindAction("SetDestination", IE_Released, this, &ATopDownPlayerController::OnSetDestinationReleased);
-
-	// support touch devices 
-	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ATopDownPlayerController::MoveToTouchLocation);
-	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ATopDownPlayerController::MoveToTouchLocation);
-
-	InputComponent->BindAction("ResetVR", IE_Pressed, this, &ATopDownPlayerController::OnResetVR);
-	InputComponent->BindAction("Attack",IE_Pressed, this, &ATopDownPlayerController::Attack);
+	InputComponent->BindAction("Attack", IE_Pressed, this, &ATopDownPlayerController::Attack);
 }
 
 void ATopDownPlayerController::BeginPlay()
 {
-	if (ATopDownCharacter* MyPawn = Cast<ATopDownCharacter>(GetPawn()))
-	{
-		if (UTopDownAnimInstance* AnimInstance = Cast<UTopDownAnimInstance>(MyPawn->GetMesh()->GetAnimInstance()))
-		{
-			AnimInstance->OnMontageEnded.AddDynamic(this, &ATopDownPlayerController::OnAttackMontageEnded);
-		}
-	}
+	AttackAddDynamic();
 }
 
-void ATopDownPlayerController::OnResetVR()
+void ATopDownPlayerController::SetNewMoveDestination_Implementation(const FVector DestLocation)
 {
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
-
-void ATopDownPlayerController::MoveToMouseCursor()
-{
-	if (!IsAttacking) 
-	{
-		if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
-		{
-			if (ATopDownCharacter* MyPawn = Cast<ATopDownCharacter>(GetPawn()))
-			{
-				if (MyPawn->GetCursorToWorld())
-				{
-					UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MyPawn->GetCursorToWorld()->GetComponentLocation());
-				}
-			}
-		}
-		else
-		{
-			// Trace to see what is under the mouse cursor
-			FHitResult Hit;
-			GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-
-			if (Hit.bBlockingHit)
-			{
-				// We hit something, move there
-				SetNewMoveDestination(Hit.ImpactPoint);
-			}
-		}
-	}
-}
-
-void ATopDownPlayerController::MoveToTouchLocation(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	FVector2D ScreenSpaceLocation(Location);
-
-	// Trace to see what is under the touch location
-	FHitResult HitResult;
-	GetHitResultAtScreenPosition(ScreenSpaceLocation, CurrentClickTraceChannel, true, HitResult);
-	if (HitResult.bBlockingHit)
-	{
-		// We hit something, move there
-		SetNewMoveDestination(HitResult.ImpactPoint);
-	}
-}
-
-void ATopDownPlayerController::SetNewMoveDestination(const FVector DestLocation)
-{
-	if (!IsAttacking) 
+	if (!IsAttacking)
 	{
 		APawn* const MyPawn = GetPawn();
 		if (MyPawn)
@@ -131,22 +87,44 @@ void ATopDownPlayerController::OnSetDestinationReleased()
 	bMoveToMouseCursor = false;
 }
 
-void ATopDownPlayerController::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruped)
+void ATopDownPlayerController::OnAttackMontageEnded_Implementation(UAnimMontage* Montage, bool bInterruped)
 {
 	IsAttacking = false;
 }
-void ATopDownPlayerController::Attack()
+void ATopDownPlayerController::Attack_Implementation()
 {
-	ATopDownCharacter* TopDownCharacter = Cast<ATopDownCharacter>(GetPawn());
-	StopMovement();
-	auto Animinstance = Cast<UTopDownAnimInstance>(TopDownCharacter -> GetMesh()->GetAnimInstance());
 	if (IsAttacking)
 		return;
-	if (Animinstance)
-	{
-		Animinstance->CPlayAttackMontage();
-	}
+	SeverAttack();
 	IsAttacking = true;
+}
+
+void ATopDownPlayerController::SeverAttack_Implementation()
+{
+	ATopDownCharacter* TopDownCharacter = Cast<ATopDownCharacter>(GetPawn());
+	
+	if (TopDownCharacter) {
+		StopMovement();
+		TopDownCharacter->AttackMontage();
+	}
+		
+}
+
+void ATopDownPlayerController::AttackAddDynamic_Implementation()
+{
+	if (ATopDownCharacter* MyPawn = Cast<ATopDownCharacter>(GetPawn()))
+	{
+		if (UTopDownAnimInstance* AnimInstance = Cast<UTopDownAnimInstance>(MyPawn->GetMesh()->GetAnimInstance()))
+		{
+			AnimInstance->OnMontageEnded.AddDynamic(this, &ATopDownPlayerController::OnAttackMontageEnded);
+		}
+	}
+}
+
+void ATopDownPlayerController::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ATopDownPlayerController, IsAttacking);
 }
 
 

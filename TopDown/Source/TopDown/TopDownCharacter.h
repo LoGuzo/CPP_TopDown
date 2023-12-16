@@ -65,6 +65,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inform, Meta = (AllowPrivateAccess = true))
 	bool IDestroyedM = false;
 public:
+	UFUNCTION(NetMulticast, Reliable)
+	void AttackMontage();
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetBuff();

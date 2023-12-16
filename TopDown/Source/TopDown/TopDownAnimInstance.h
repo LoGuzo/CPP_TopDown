@@ -23,6 +23,8 @@ public:
 
 	//Called AttackMontage
 	void EPlayAttackMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
 	void CPlayAttackMontage();
 	
 	//DeadMontage
@@ -41,7 +43,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* EAttackMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Montage, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* CAttackMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Montage, Meta = (AllowPrivateAccess = true))
@@ -49,6 +51,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = DeadCheck, Meta = (AllowPrivateAccess = true))
 	bool isDead;
+
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	UFUNCTION()
 	void AnimNotify_AttackHit();

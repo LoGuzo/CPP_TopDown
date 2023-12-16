@@ -2,6 +2,7 @@
 
 
 #include "TopDownAnimInstance.h"
+#include "Net/UnrealNetwork.h"
 #include <TopDown/TopDownPlayerController.h>
 
 UTopDownAnimInstance::UTopDownAnimInstance()
@@ -43,7 +44,7 @@ void UTopDownAnimInstance::EPlayAttackMontage()
 	}
 }
 
-void UTopDownAnimInstance::CPlayAttackMontage()
+void UTopDownAnimInstance::CPlayAttackMontage_Implementation()
 {
 	if (!Montage_IsPlaying(CAttackMontage))
 	{
@@ -67,4 +68,12 @@ void UTopDownAnimInstance::setIsDead(bool a)
 void UTopDownAnimInstance::AnimNotify_AttackHit()
 {
 	OnAttackHit.Broadcast();
+}
+
+void UTopDownAnimInstance::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Example of replicating a variable
+	DOREPLIFETIME(UTopDownAnimInstance, CAttackMontage);
 }
