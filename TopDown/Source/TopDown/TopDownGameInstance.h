@@ -67,8 +67,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Coordi, Meta = (AllowPrivateAccess = true))
 	TArray<FVector> saveCoordi;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Color, Meta = (AllowPrivateAccess = true))
+	TArray<int32> saveColor;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inform, Meta = (AllowPrivateAccess = true))
 	AActor* InsWhoDestroyed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inform, Meta = (AllowPrivateAccess = true))
+	int32 chkSuccess;
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -103,4 +109,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetIWD(AActor* a);
+
+	UFUNCTION(BlueprintCallable)
+	void SetChkSuccess(int32 a);
+
+	UFUNCTION(BlueprintCallable)
+	void addSaveColor(const int32 Color);
+
+	UFUNCTION(BlueprintCallable)
+	bool chkSaveColor(const int32 Color);
 };

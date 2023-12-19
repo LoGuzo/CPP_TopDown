@@ -7,6 +7,7 @@ UTopDownGameInstance::UTopDownGameInstance() {
 	static ConstructorHelpers::FObjectFinder<UDataTable>DATA(TEXT("DataTable'/Game/TopDownCPP/Blueprints/Progression/Stat/StatDataTable.StatDataTable'"));
 
 	MyStats = DATA.Object;
+	chkSuccess = 0;
 }
 
 void UTopDownGameInstance::Init()
@@ -75,4 +76,19 @@ AActor* UTopDownGameInstance::getIWD()
 void UTopDownGameInstance::SetIWD(AActor* a)
 {
 	InsWhoDestroyed = a;
+}
+
+void UTopDownGameInstance::SetChkSuccess(int32 a)
+{
+	chkSuccess = a;
+}
+
+void UTopDownGameInstance::addSaveColor(const int32 Color)
+{
+	saveColor.Add(Color);
+}
+
+bool UTopDownGameInstance::chkSaveColor(const int32 Color)
+{
+	return saveColor.Contains(Color);
 }
