@@ -43,7 +43,7 @@ private:
 	class UDecalComponent* CursorToWorld;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
-	int32 Buff = 0;
+	int32 Buff = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	FString MyColor;
