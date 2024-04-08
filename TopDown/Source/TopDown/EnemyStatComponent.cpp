@@ -42,17 +42,26 @@ void UEnemyStatComponent::SetType(int32 newtype)
 			if (StatData)
 			{
 				type = StatData->type;
-				Hp = StatData->MaxHP;
+				SetHp(StatData->MaxHP);
+				MaxHp = StatData->MaxHP;
 				Attack = StatData->Attack;
 			}
 		}
 	}
 }
 
-void UEnemyStatComponent::OnAttacked(float DamageAmount)
+void UEnemyStatComponent::SetHp(int32 _Hp)
 {
-	Hp -= DamageAmount;
+	Hp = _Hp;
 	if (Hp < 0)
 		Hp = 0;
+
+	OnHpChanged.Broadcast();
+}
+
+void UEnemyStatComponent::OnAttacked(float DamageAmount)
+{
+	int32 hp = Hp - DamageAmount;
+	SetHp(hp);
 }
 

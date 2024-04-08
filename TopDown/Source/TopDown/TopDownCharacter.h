@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "TopDownCharacter.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnBuffChanged);
+
 UCLASS(Blueprintable)
 class ATopDownCharacter : public ACharacter
 {
@@ -64,6 +66,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inform, Meta = (AllowPrivateAccess = true))
 	bool IDestroyedM = false;
+
+	UPROPERTY(EditAnywhere, Category = "HUD")
+	TSubclassOf<class UUserWidget> MainUi;
+
+	UPROPERTY(EditAnywhere, Category = "HUD")
+	TSubclassOf<class UTopDownWidget> CharacterUi;
 public:
 	UFUNCTION(NetMulticast, Reliable)
 	void AttackMontage();
@@ -85,4 +93,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetIDM();
+
+	FOnBuffChanged OnBuffChanged;
 };

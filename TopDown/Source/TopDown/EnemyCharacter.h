@@ -76,6 +76,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void setCoordi(const FVector& NewCoordi);
 
+	FString GetEColor() { return EColor; }
+
 	void DestroyC();
 
 };

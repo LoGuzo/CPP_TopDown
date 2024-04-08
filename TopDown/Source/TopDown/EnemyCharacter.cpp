@@ -113,12 +113,6 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 			FTimerHandle TimerHandle;
 			FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &AEnemyCharacter::DestroyC);
 
-			if (ATopDownCharacter* ChkCharacter = Cast<ATopDownCharacter>(DamageCauser)) {
-				if (EColor == ChkCharacter->GetMyColor()) {
-					ChkCharacter->SetBuff(ChkCharacter->GetBuff() + 1);
-
-				}
-			}
 			//Delay 1sec
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 1.f, false);
 		}

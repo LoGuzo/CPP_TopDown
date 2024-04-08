@@ -14,7 +14,9 @@
 #include "TopDownAnimInstance.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "Blueprint/UserWidget.h"
 #include "EnemyStatComponent.h"
+#include "TopDownWidget.h"
 
 ATopDownCharacter::ATopDownCharacter()
 {
@@ -69,6 +71,15 @@ void ATopDownCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	Stat->SetType(Type);
+
+	if (MainUi)
+	{
+		UUserWidget* HUDWidget = CreateWidget<UUserWidget>(GetWorld(), MainUi);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToViewport();
+		}
+	}
 }
 
 void ATopDownCharacter::Tick(float DeltaSeconds)
@@ -96,6 +107,13 @@ void ATopDownCharacter::PostInitializeComponents()
 	{
 		AnimInstance->OnAttackHit.AddUObject(this, &ATopDownCharacter::AttackCheck);
 	}
+	auto HUDWidget = Cast<UTopDownWidget>(CharacterUi);
+	if (HUDWidget)
+	{
+		HUDWidget->BindHp(Stat);
+		HUDWidget->BindBuff(this);
+	}
+
 }
 
 
@@ -121,6 +139,7 @@ FString ATopDownCharacter::GetMyColor()
 void ATopDownCharacter::SetBuff(int32 b)
 {
 	Buff = b;
+	OnBuffChanged.Broadcast();
 }
 
 void ATopDownCharacter::SetMyColor(FString setMyColor)
@@ -176,6 +195,10 @@ void ATopDownCharacter::AttackCheck()
 		if (Enemy){
 			FDamageEvent DamageEvent;
 			HitResult.Actor->TakeDamage(Stat->GetAttack(), DamageEvent, GetController(), this);
+
+			if (Enemy->GetEColor() == GetMyColor()) {
+				SetBuff(GetBuff() + 1);
+			}
 		}
 	}
 }
