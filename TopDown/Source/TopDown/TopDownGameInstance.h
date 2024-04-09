@@ -16,7 +16,7 @@ struct FStatStruct : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite)
-	int32 type;
+	int32 Type;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite)
 	int32 Attack;

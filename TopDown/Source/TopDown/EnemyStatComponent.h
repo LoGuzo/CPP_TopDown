@@ -26,7 +26,7 @@ public:
 	void SetHp(int32 _Hp);
 	void OnAttacked(float DamageAmount);
 
-	int32 GetType() { return type; }
+	int32 GetType() { return Type; }
 	int32 GetHp() { return Hp; }
 	int32 GetMaxHp() { return MaxHp; }
 	float GetHpRatio() { return Hp / (float)MaxHp;}
@@ -35,7 +35,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = Stat, Meta = (AllowPrivateAccess = true))
-	int32 type;
+	int32 Type;
 
 	UPROPERTY(EditAnywhere, Category = Stat, Meta = (AllowPrivateAccess = true))
 	int32 Hp;

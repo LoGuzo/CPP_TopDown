@@ -29,7 +29,7 @@ void UEnemyStatComponent::BeginPlay()
 void UEnemyStatComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-	SetType(type);
+	SetType(Type);
 }
 
 void UEnemyStatComponent::SetType(int32 newtype)
@@ -41,7 +41,7 @@ void UEnemyStatComponent::SetType(int32 newtype)
 			auto StatData = MyGameInstance->GetStatData(newtype);
 			if (StatData)
 			{
-				type = StatData->type;
+				Type = StatData->Type;
 				SetHp(StatData->MaxHP);
 				MaxHp = StatData->MaxHP;
 				Attack = StatData->Attack;
