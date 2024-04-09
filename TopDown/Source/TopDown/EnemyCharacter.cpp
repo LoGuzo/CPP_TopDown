@@ -7,6 +7,8 @@
 #include "TopDownCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnemyStatComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "Engine/World.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -20,13 +22,14 @@ AEnemyCharacter::AEnemyCharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	Stat = CreateDefaultSubobject<UEnemyStatComponent>(TEXT("STAT"));
-
+	IsAttacking = false;
 }
 
 // Called when the game starts or when spawned
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	AttackAddDynamic();
 }
 
 void AEnemyCharacter::PostInitializeComponents()
@@ -36,7 +39,6 @@ void AEnemyCharacter::PostInitializeComponents()
 	AnimInstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance) 
 	{
-		AnimInstance->OnMontageEnded.AddDynamic(this, &AEnemyCharacter::OnAttackMontageEnded);
 		AnimInstance->OnAttackHit.AddUObject(this, &AEnemyCharacter::AttackCheck);
 		AnimInstance->setIsDead(false);
 	}
@@ -54,19 +56,6 @@ void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-}
-
-// Attack Func
-void AEnemyCharacter::Attack()
-{
-	if (IsAttacking)
-		return;
-	auto Animinstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
-	if (Animinstance)
-	{
-		Animinstance->EPlayAttackMontage();
-	}
-	IsAttacking = true;
 }
 
 void AEnemyCharacter::AttackCheck()
@@ -92,11 +81,41 @@ void AEnemyCharacter::AttackCheck()
 	}
 
 }
-
-void AEnemyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruped)
+void AEnemyCharacter::OnAttackMontageEnded_Implementation(UAnimMontage* Montage, bool bInterruped)
 {
 	IsAttacking = false;
-	OnAttackEnd.Broadcast();
+}
+void AEnemyCharacter::Attack_Implementation()
+{
+	if (IsAttacking)
+		return;
+	SeverAttack();
+	IsAttacking = true;
+}
+
+void AEnemyCharacter::SeverAttack_Implementation()
+{
+	AnimInstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->EPlayAttackMontage();
+	}
+
+}
+
+void AEnemyCharacter::AttackAddDynamic_Implementation()
+{
+	AnimInstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
+	if(AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &AEnemyCharacter::OnAttackMontageEnded);
+	}
+}
+
+void AEnemyCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AEnemyCharacter, IsAttacking);
 }
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -112,7 +131,6 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 			Animinstance->setIsDead(true);
 			FTimerHandle TimerHandle;
 			FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &AEnemyCharacter::DestroyC);
-
 			//Delay 1sec
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 1.f, false);
 		}

@@ -23,7 +23,6 @@ void UTopDownWidget::BindBuff(class ATopDownCharacter* _Character)
 {
 	CCharacter = _Character;
 	_Character->OnBuffChanged.AddUObject(this, &UTopDownWidget::UpdateBuff);
-	UE_LOG(LogTemp, Warning, TEXT("TTTT"));
 }
 
 void UTopDownWidget::UpdateBuff()

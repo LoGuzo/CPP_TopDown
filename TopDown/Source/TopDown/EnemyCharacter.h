@@ -30,15 +30,23 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-	// Called Attack Func
-	void Attack();
-
 	void AttackCheck();
 
 	FOnAttackEnd OnAttackEnd;
-	// Called OnAttackMontageEnded Func
-	UFUNCTION()
+	UFUNCTION(Server, Reliable)
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruped);
+
+	UFUNCTION(Server, Reliable)
+	void Attack();
+
+	UFUNCTION(Server, Reliable)
+	void AttackAddDynamic();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void SeverAttack();
+
+	FString GetEColor() { return EColor; }
+	int32 GetHp() { return Hp; }
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 private:
@@ -60,8 +68,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	FString EColor;
 
-	UPROPERTY(VisibleAnywhere)
-	bool IsAttacking = false;
+	UPROPERTY(Replicated, VisibleAnywhere)
+	bool IsAttacking;
+
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	UPROPERTY()
 	class UTopDownAnimInstance* AnimInstance;
@@ -75,8 +85,6 @@ private:
 public:
 	UFUNCTION(BlueprintCallable)
 	void setCoordi(const FVector& NewCoordi);
-
-	FString GetEColor() { return EColor; }
 
 	void DestroyC();
 

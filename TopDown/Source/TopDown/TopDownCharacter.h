@@ -45,7 +45,7 @@ private:
 	class UDecalComponent* CursorToWorld;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
-	int32 Buff = 2;
+	int32 Buff;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	FString MyColor;
@@ -68,10 +68,7 @@ private:
 	bool IDestroyedM = false;
 
 	UPROPERTY(EditAnywhere, Category = "HUD")
-	TSubclassOf<class UUserWidget> MainUi;
-
-	UPROPERTY(EditAnywhere, Category = "HUD")
-	TSubclassOf<class UTopDownWidget> CharacterUi;
+	TSubclassOf<class UTopDownWidget> CharacterUI;
 public:
 	UFUNCTION(NetMulticast, Reliable)
 	void AttackMontage();

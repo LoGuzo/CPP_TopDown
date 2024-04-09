@@ -65,21 +65,14 @@ ATopDownCharacter::ATopDownCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	Stat = CreateDefaultSubobject<UEnemyStatComponent>(TEXT("STAT"));
+
 }
 
 void ATopDownCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	Stat->SetType(Type);
-
-	if (MainUi)
-	{
-		UUserWidget* HUDWidget = CreateWidget<UUserWidget>(GetWorld(), MainUi);
-		if (HUDWidget)
-		{
-			HUDWidget->AddToViewport();
-		}
-	}
+	SetBuff(0);
 }
 
 void ATopDownCharacter::Tick(float DeltaSeconds)
@@ -107,11 +100,16 @@ void ATopDownCharacter::PostInitializeComponents()
 	{
 		AnimInstance->OnAttackHit.AddUObject(this, &ATopDownCharacter::AttackCheck);
 	}
-	auto HUDWidget = Cast<UTopDownWidget>(CharacterUi);
-	if (HUDWidget)
+
+	if (CharacterUI)
 	{
-		HUDWidget->BindHp(Stat);
-		HUDWidget->BindBuff(this);
+		UTopDownWidget* HUDWidget = CreateWidget<UTopDownWidget>(GetWorld(), CharacterUI);
+		if (HUDWidget)
+		{
+			HUDWidget->BindHp(Stat);
+			HUDWidget->BindBuff(this);
+			HUDWidget->AddToViewport();
+		}
 	}
 
 }
@@ -196,7 +194,7 @@ void ATopDownCharacter::AttackCheck()
 			FDamageEvent DamageEvent;
 			HitResult.Actor->TakeDamage(Stat->GetAttack(), DamageEvent, GetController(), this);
 
-			if (Enemy->GetEColor() == GetMyColor()) {
+			if (Enemy->GetEColor() == GetMyColor()&& Enemy->GetHp()<=0) {
 				SetBuff(GetBuff() + 1);
 			}
 		}
