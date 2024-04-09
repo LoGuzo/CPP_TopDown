@@ -57,10 +57,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	int32 Type;
 
-	//Enemy Stat
-	UPROPERTY(VisibleAnywhere)
-	class UEnemyStatComponent* Stat;
-
 	//Enemy Speed
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 	float Speed;
@@ -88,4 +84,13 @@ public:
 
 	void DestroyC();
 
+	// Enemy Stat
+	UPROPERTY(VisibleAnywhere)
+	class UEnemyStatComponent* Stat;
+
+	// Enemy Hp UI
+	UPROPERTY(VisibleAnywhere)
+	class UWidgetComponent* HpBar;
+
+	class UTopHpWidget* HpWidget;
 };

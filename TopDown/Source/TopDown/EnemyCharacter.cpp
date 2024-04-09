@@ -9,6 +9,8 @@
 #include "EnemyStatComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
+#include "Components/WidgetComponent.h"
+#include "TopHpWidget.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -23,24 +25,44 @@ AEnemyCharacter::AEnemyCharacter()
 
 	Stat = CreateDefaultSubobject<UEnemyStatComponent>(TEXT("STAT"));
 	IsAttacking = false;
+
+	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBAR"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0.f, 0.f, 150.f));
+	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+
+	static ConstructorHelpers::FClassFinder<UUserWidget>UW(TEXT("WidgetBlueprint'/Game/TopDownCPP/Blueprints/UI/BP_TopHp.BP_TopHp_C'"));
+	if (UW.Succeeded())
+	{
+		HpBar->SetWidgetClass(UW.Class);
+		HpBar->SetDrawSize(FVector2D(200.f, 500.f));
+	}
 }
 
 // Called when the game starts or when spawned
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	Stat->SetType(Type);
 	AttackAddDynamic();
 }
 
 void AEnemyCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	Stat->SetType(Type);
 	AnimInstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance) 
 	{
 		AnimInstance->OnAttackHit.AddUObject(this, &AEnemyCharacter::AttackCheck);
 		AnimInstance->setIsDead(false);
+	}
+	HpBar->InitWidget();
+
+	HpWidget = Cast<UTopHpWidget>(HpBar->GetUserWidgetObject());
+	if (HpWidget)
+	{
+		HpWidget->BindHp(Stat);
+		HpWidget->SetRenderOpacity(0.f);
 	}
 }
 
@@ -100,7 +122,6 @@ void AEnemyCharacter::SeverAttack_Implementation()
 	{
 		AnimInstance->EPlayAttackMontage();
 	}
-
 }
 
 void AEnemyCharacter::AttackAddDynamic_Implementation()
@@ -122,6 +143,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 {
 	Stat->OnAttacked(DamageAmount);
 	Hp = Stat->GetHp();
+	HpWidget->SetRenderOpacity(1.f);
 	if (Hp <= 0) {
 		auto Animinstance = Cast<UTopDownAnimInstance>(GetMesh()->GetAnimInstance());
 		WhoDestroyed = DamageCauser;
